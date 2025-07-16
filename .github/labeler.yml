@@ -1,0 +1,46 @@
+# Configuration for automatic labeling of pull requests
+
+# Source code changes
+"code":
+  - changed-files:
+    - any-glob-to-any-file: "pkg/**/*.go"
+
+# Test changes
+"tests":
+  - changed-files:
+    - any-glob-to-any-file: ["**/*_test.go", "test/**/*.go"]
+
+# Documentation changes  
+"documentation":
+  - changed-files:
+    - any-glob-to-any-file: ["README.md", "docs/**/*", "*.md", "CLAUDE.md"]
+
+# CI/CD changes
+"ci":
+  - changed-files:
+    - any-glob-to-any-file: [".github/**/*", "go.mod", "go.sum"]
+
+# Configuration changes
+"config":
+  - changed-files:
+    - any-glob-to-any-file: ["go.mod", "go.sum", ".gitignore", ".golangci.yml"]
+
+# Dependencies
+"dependencies":
+  - changed-files:
+    - any-glob-to-any-file: ["go.mod", "go.sum"]
+
+# Provider related changes
+"providers":
+  - changed-files:
+    - any-glob-to-any-file: ["pkg/providers/**/*", "**/*provider*_test.go"]
+
+# CLI related changes
+"cli":
+  - changed-files:
+    - any-glob-to-any-file: ["cmd/**/*.go", "pkg/cli/**/*.go"]
+
+# Core library changes
+"core":
+  - changed-files:
+    - any-glob-to-any-file: ["pkg/metadata/**/*", "pkg/scraper/**/*"]
