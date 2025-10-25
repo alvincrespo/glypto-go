@@ -1,6 +1,6 @@
 module github.com/alvincrespo/glypto-go
 
-go 1.24.2
+go 1.25.3
 
 require (
 	github.com/fatih/color v1.18.0
