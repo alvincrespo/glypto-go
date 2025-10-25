@@ -20,21 +20,31 @@ Glypto Go is a CLI tool for scraping metadata from websites using a provider-bas
 - `go test -cover ./...` - Run tests with coverage report
 - `go test ./pkg/metadata -v` - Run specific package tests
 - `go test -race ./...` - Run tests with race detection
+- `go test ./pkg/scraper -v` - Test scraper engine
+- `go test ./pkg/providers -v` - Test provider implementations
 
 ### Code Quality
 - `go fmt ./...` - Format all code
 - `go mod tidy` - Clean up dependencies
 - `golangci-lint run` - Run linter (if installed)
 
+## Prerequisites
+
+- **Go 1.24+** (checked in `go.mod`)
+- **Dependencies**: `golang.org/x/net/html` (parsing), `spf13/cobra` (CLI), `fatih/color` (output formatting)
+
 ## Architecture
 
 The project uses a **provider-based architecture** with the following key design patterns:
 
 ### Core Flow
-1. **HTML Parsing**: Uses `golang.org/x/net/html` to parse web pages
-2. **Provider System**: Each provider implements `MetadataProvider` interface to extract specific types of metadata
-3. **Priority Resolution**: Providers have priority numbers (lower = higher priority) for value resolution
-4. **Method Chaining**: Scraper uses fluent interface for sequential HTML element processing
+1. **CLI Entry** (`cmd/glypto/main.go` + `pkg/cli/`): Cobra-based CLI with interactive URL prompts
+2. **HTTP Fetching** (`pkg/cli/scrape.go`): Fetches web pages using standard `net/http`
+3. **HTML Parsing**: Uses `golang.org/x/net/html` to parse response body into DOM tree
+4. **Provider System**: Each provider implements `MetadataProvider` interface to extract specific metadata types
+5. **Priority Resolution**: Providers have priority numbers (lower = higher priority) for intelligent fallback
+6. **Method Chaining**: Scraper uses fluent interface for sequential HTML element type processing
+7. **Colored Output** (`pkg/cli/scrape.go`): Uses `fatih/color` for CLI formatting
 
 ### Key Components
 
@@ -52,10 +62,15 @@ The project uses a **provider-based architecture** with the following key design
 - `ResolveValue()` uses provider priority to resolve metadata values
 
 **Scraper Engine** (`pkg/scraper/scraper.go`):
-- Uses method chaining: `scrapeMetaTags().scrapeTitleTag().scrapeHeadingTags()`
-- Walks HTML DOM tree for each element type
-- Delegates extraction to provider registry
-- Builds final `Metadata` result object
+- Uses method chaining: `scrapeMetaTags().scrapeTitleTag().scrapeHeadingTags().scrapeLinkTags().scrapeFeedLinks()`
+- Each method walks HTML DOM tree targeting specific element types (`<meta>`, `<title>`, `<h1>`, `<link>`)
+- Delegates extraction to provider registry for priority-based provider resolution
+- Builds final `Metadata` result object with aggregated provider data
+
+**CLI Package** (`pkg/cli/`):
+- `root.go`: Main command setup with Cobra
+- `scrape.go`: HTTP fetching, CLI output formatting, interactive URL prompting
+- Uses `fatih/color` for colored console output
 
 **Built-in Providers** (priority order):
 1. **OpenGraph** (priority 1): Extracts `og:*` properties
@@ -78,17 +93,23 @@ The architecture carefully avoids import cycles:
 - `cli` package only depends on scraper
 
 ### Adding New Providers
-1. Implement `MetadataProvider` interface
-2. Define unique `Name()` and `Priority()`
-3. Implement `CanHandle()` logic for HTML elements
-4. Extract data in `Scrape()` method
-5. Add to provider loader in `pkg/providers/loader.go`
+1. Implement `MetadataProvider` interface from `pkg/metadata/types.go`
+2. Define unique `Name()` (string identifier) and `Priority()` (int: 1=highest, 4+=lowest)
+3. Implement `CanHandle(node *html.Node)` to identify relevant elements
+4. Extract key-value data in `Scrape(node *html.Node)` method
+5. Implement `GetValue(key string, data map[string][]string)` for value resolution
+6. Add to provider loader in `pkg/providers/loader.go`
+
+**Reference Implementations**: See `pkg/providers/opengraph.go`, `twitter.go`, or `standardmeta.go` for examples of different extraction patterns. Also see `pkg/providers/base.go` for shared provider utilities.
 
 ### Factory Pattern
 `pkg/scraper/factory.go` provides convenience functions:
-- `CreateScraper()` - Auto-loads default providers
-- `CreateScraperWithProviders()` - Use custom provider list
-- `ScrapeMetadata()` - One-shot scraping function
+- `CreateScraper()` - Auto-loads all default providers (OpenGraph, Twitter, StandardMeta, OtherElements)
+- `CreateScraperWithProviders(providerList)` - Create scraper with custom `[]MetadataProvider` instances
+- `CreateScraperWithProviderNames(names)` - Create scraper by provider name strings (e.g., `[]string{"opengraph", "twitter"}`)
+- `ScrapeMetadata(doc)` - One-shot scraping using default providers; returns `*Metadata`
+
+Use `CreateScraperWithProviderNames()` for CLI scenarios where users specify providers by name. Use `CreateScraperWithProviders()` for programmatic APIs with custom provider instances.
 
 ## Testing Notes
 
@@ -97,3 +118,29 @@ Tests use table-driven patterns typical for Go. When adding tests:
 - Test both success and error cases
 - Use `*html.Node` for DOM testing (from `golang.org/x/net/html`)
 - Mock providers by implementing `MetadataProvider` interface
+- Run specific test file: `go test ./pkg/metadata -v -run TestMetadata`
+
+## Common Development Workflows
+
+### Adding a New Metadata Field to Results
+1. Add getter method to `Metadata` struct in `pkg/metadata/metadata.go`
+2. Implement extraction logic in relevant providers (e.g., add to `opengraph.go` for new `og:*` property)
+3. Add test cases to provider test files
+4. Update CLI output formatting in `pkg/cli/scrape.go` if needed
+
+### Creating a Custom Provider
+1. Create new file `pkg/providers/customprovider.go`
+2. Implement `MetadataProvider` interface with unique name and priority
+3. Write tests in `pkg/providers/customprovider_test.go`
+4. Register in `pkg/providers/loader.go` if it should be auto-loaded
+
+### Debugging Scraper Output
+- Run with verbose test output: `go test -v ./pkg/scraper`
+- Check provider priority resolution in `pkg/providers/registry.go`
+- Verify `CanHandle()` logic in individual provider implementations
+- Use `go run ./cmd/glypto scrape URL` to test live with real websites
+
+### Modifying CLI Output
+- Format code is in `pkg/cli/scrape.go`
+- Uses `github.com/fatih/color` for styling
+- Check existing color scheme before adding new outputs
