@@ -30,7 +30,7 @@ Glypto Go is a CLI tool for scraping metadata from websites using a provider-bas
 
 ## Prerequisites
 
-- **Go 1.25+** (checked in `go.mod`)
+- **Go 1.25.9+** (checked in `go.mod`)
 - **Dependencies**: `golang.org/x/net/html` (parsing), `spf13/cobra` (CLI), `fatih/color` (output formatting)
 
 ## Architecture
