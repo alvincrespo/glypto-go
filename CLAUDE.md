@@ -30,7 +30,7 @@ Glypto Go is a CLI tool for scraping metadata from websites using a provider-bas
 
 ## Prerequisites
 
-- **Go 1.24+** (checked in `go.mod`)
+- **Go 1.25+** (checked in `go.mod`)
 - **Dependencies**: `golang.org/x/net/html` (parsing), `spf13/cobra` (CLI), `fatih/color` (output formatting)
 
 ## Architecture
@@ -106,8 +106,8 @@ The architecture carefully avoids import cycles:
 `pkg/scraper/factory.go` provides convenience functions:
 - `CreateScraper()` - Auto-loads all default providers (OpenGraph, Twitter, StandardMeta, OtherElements)
 - `CreateScraperWithProviders(providerList)` - Create scraper with custom `[]MetadataProvider` instances
-- `CreateScraperWithProviderNames(names)` - Create scraper by provider name strings (e.g., `[]string{"opengraph", "twitter"}`)
-- `ScrapeMetadata(doc)` - One-shot scraping using default providers; returns `*Metadata`
+- `CreateScraperWithProviderNames(names)` - Create scraper by provider name strings (e.g., `[]string{"openGraph", "twitter"}`)
+- `ScrapeMetadata(doc)` - One-shot scraping using default providers; returns `(*Metadata, error)`
 
 Use `CreateScraperWithProviderNames()` for CLI scenarios where users specify providers by name. Use `CreateScraperWithProviders()` for programmatic APIs with custom provider instances.
 
