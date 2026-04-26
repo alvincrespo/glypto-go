@@ -11,18 +11,14 @@ jobs:
     name: Test & Build
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        go-version: [1.25.3]
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Setup Go ${{ matrix.go-version }}
+      - name: Setup Go
         uses: actions/setup-go@v6
         with:
-          go-version: ${{ matrix.go-version }}
+          go-version-file: 'go.mod'
 
       - name: Cache Go modules
         uses: actions/cache@v4
@@ -59,7 +55,6 @@ jobs:
         run: go test -v -race -coverprofile=coverage.out ./...
 
       - name: Upload coverage reports as artifact
-        if: matrix.go-version == '1.25.3'
         uses: actions/upload-artifact@v5
         with:
           name: coverage-reports
@@ -76,7 +71,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v6
         with:
-          go-version: '1.25.3'
+          go-version-file: 'go.mod'
 
       - name: Run govulncheck
         run: |
@@ -94,7 +89,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v6
         with:
-          go-version: '1.25.3'
+          go-version-file: 'go.mod'
 
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v9
