@@ -257,7 +257,7 @@ The following providers are included by default, listed by priority:
 
 ### Prerequisites
 
-- Go 1.25 or higher
+- Go 1.25.9 or higher
 - Git (for cloning the repository)
 
 ### Building
