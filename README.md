@@ -1,7 +1,7 @@
 # Glypto Go
 
 [![CI](https://github.com/alvincrespo/glypto-go/workflows/CI/badge.svg)](https://github.com/alvincrespo/glypto-go/actions)
-[![Go Version](https://img.shields.io/badge/go-%3E%3D1.25-blue.svg)](https://golang.org/)
+[![Go Version](https://img.shields.io/badge/go-%3E%3D1.25.9-blue.svg)](https://golang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A Go implementation of Glypto - a CLI tool for scraping metadata from websites using a provider-based architecture. Extract Open Graph tags, Twitter Cards, standard meta tags, and RSS/Atom feeds from web pages.
