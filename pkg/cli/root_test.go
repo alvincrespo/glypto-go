@@ -77,7 +77,7 @@ func TestRootCmdProperties(t *testing.T) {
 		t.Error("Expected Long description to be set")
 	}
 
-	if rootCmd.Version != "0.1.0" {
-		t.Errorf("Expected Version to be '0.1.0', got '%s'", rootCmd.Version)
+	if rootCmd.Version != "0.2.0" {
+		t.Errorf("Expected Version to be '0.2.0', got '%s'", rootCmd.Version)
 	}
 }
