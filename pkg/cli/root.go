@@ -14,7 +14,7 @@ var rootCmd = &cobra.Command{
 
 It extracts metadata including titles, descriptions, images, Open Graph data,
 Twitter Cards, and RSS/Atom feeds from web pages.`,
-	Version: "0.2.0",
+	Version: "0.2.1",
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
